@@ -1,20 +1,15 @@
-from sqlalchemy import Column, Integer, String, DateTime
-from sqlalchemy import Enum as EnumSQL
-from enum import Enum
-from session import Base
+from sqlalchemy import Column, Integer, String, DateTime, Text
 from datetime import datetime, timezone
+from sqlalchemy.orm import DeclarativeBase
 
-class Status(Enum):
-    PENDING = "pending"
-    PROCESSING = "processing"
-    DONE = "done"
-    FAILED = "failed"
+class Base(DeclarativeBase):
+    pass
 
 class Job(Base):
     __tablename__ = "jobs"
 
-    id = Column("id", Integer, primary_key=True, index=True)
-    status = Column("status", EnumSQL(Status, create_constraint=True), default=Status.PENDING, index=True)
-    input_data = Column("input_data", String, index=True)
-    result = Column("result", String, index=True)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), index=True)
+    id = Column(Integer, primary_key=True, index=True)
+    status = Column(String, default="pending")
+    input_data = Column(Text)
+    result = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))

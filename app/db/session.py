@@ -1,17 +1,24 @@
+import time
+
 from sqlalchemy import create_engine
-from sqlalchemy.orm import DeclarativeBase, sessionmaker
-
-from dotenv import load_dotenv
-import os
-
-load_dotenv()
-DATABASE_URL = os.getenv("DATABASE_URL")
+from sqlalchemy.orm import sessionmaker
+from app.core.config import DATABASE_URL
 
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
     
-engine = create_engine(DATABASE_URL, pool_pre_ping=True)
-SessionLocal = sessionmaker(bind=engine)
+def create_db_engine_with_retry():
+    for i in range(10):
+        try:
+            engine = create_engine(DATABASE_URL)
+            conn = engine.connect()
+            conn.close()
+            return engine
+        except Exception as e:
+            print(f"DB not ready, retrying... ({i})")
+            time.sleep(2)
 
-class Base(DeclarativeBase):
-    pass
+    raise Exception("DB never became ready")
+
+engine = create_db_engine_with_retry()
+SessionLocal = sessionmaker(bind=engine)

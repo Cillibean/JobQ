@@ -1,16 +1,16 @@
 from fastapi import FastAPI
-from db.session import Base, SessionLocal, engine
+from app.api.routes import router
+from app.db.models import Base
+from app.db.session import engine
 
 app = FastAPI()
-Base.metadata.create_all(bind=engine)
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+@app.on_event("startup")
+def startup():
+    Base.metadata.create_all(bind=engine)
 
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
+app.include_router(router)
+
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
