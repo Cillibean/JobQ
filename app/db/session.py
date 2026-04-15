@@ -4,9 +4,12 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from app.core.config import DATABASE_URL
 
+if not DATABASE_URL:
+    raise Exception("DATABASE_URL is not set")
+
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
-    
+
 def create_db_engine_with_retry():
     for i in range(10):
         try:
