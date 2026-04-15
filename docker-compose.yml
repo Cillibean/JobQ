@@ -12,6 +12,12 @@ services:
       - redis
     env_file:
       - .env
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   worker:
     build:
@@ -22,6 +28,7 @@ services:
       - db
     env_file:
       - .env
+    restart: always
 
   db:
     image: postgres:15
@@ -31,8 +38,10 @@ services:
       POSTGRES_DB: jobs
     ports:
       - "5433:5432"
+    restart: always
 
   redis:
     image: redis:7
     ports:
       - "6380:6379"
+    restart: always

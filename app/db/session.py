@@ -34,3 +34,6 @@ def get_session_local():
             bind=get_engine()
         )
     return _SessionLocal
+
+engine = create_engine(DATABASE_URL)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
