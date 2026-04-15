@@ -1,11 +1,19 @@
-from app.db.session import SessionLocal
+from app.db.session import get_session_local
 from app.db.models import Job
 from app.tasks.worker_tasks import process_job_task
 
+def get_db():
+    Session = get_session_local()
+    db = Session()
+    try:
+        yield db
+    finally:
+        db.close()
 
 def create_job(text: str):
     job = None
-    with SessionLocal() as db:
+    Session = get_session_local()
+    with Session() as db:
         job = Job(input_data=text, status="pending")
         db.add(job)
         db.commit()
@@ -16,7 +24,8 @@ def create_job(text: str):
 
 def get_job(job_id: int):
     job = None
-    with SessionLocal() as db:
+    Session = get_session_local()
+    with Session() as db:
         job = db.query(Job).filter(Job.id == job_id).first()
         if not job:
             return {"error": "Job not found"}

@@ -10,18 +10,27 @@ if not DATABASE_URL:
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
-def create_db_engine_with_retry():
-    for i in range(10):
-        try:
-            engine = create_engine(DATABASE_URL)
-            conn = engine.connect()
-            conn.close()
-            return engine
-        except Exception as e:
-            print(f"DB not ready, retrying... ({i})")
-            time.sleep(2)
 
-    raise Exception("DB never became ready")
+_engine = None
+_SessionLocal = None
 
-engine = create_db_engine_with_retry()
-SessionLocal = sessionmaker(bind=engine)
+
+def get_engine():
+    global _engine
+    if _engine is None:
+        if not DATABASE_URL:
+            raise Exception("DATABASE_URL not set")
+
+        _engine = create_engine(DATABASE_URL)
+
+    return _engine
+
+def get_session_local():
+    global _SessionLocal
+    if _SessionLocal is None:
+        _SessionLocal = sessionmaker(
+            autocommit=False,
+            autoflush=False,
+            bind=get_engine()
+        )
+    return _SessionLocal
