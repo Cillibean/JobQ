@@ -3,17 +3,19 @@ name: CI Pipeline
 on:
   push:
     branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   test:
     runs-on: ubuntu-latest
-    env:
-      DATABASE_URL: postgresql://postgres:postgres@db:5432/jobs
-      REDIS_URL: redis://redis:6379/0
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Create CI environment file
+        run: cp .env.example .env
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -23,5 +25,5 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Basic import test
-        run: python -c "from app.db.session import get_engine; print('ok')"
+      - name: Run test suite
+        run: pytest
