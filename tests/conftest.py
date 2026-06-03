@@ -1,10 +1,15 @@
 import os
+import sys
 from pathlib import Path
 
 import pytest
 
 
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 TEST_DB_PATH = Path(__file__).resolve().parent / "test_jobq.sqlite3"
+
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 os.environ["DATABASE_URL"] = f"sqlite:///{TEST_DB_PATH}"
 os.environ["REDIS_URL"] = "redis://localhost:6379/0"
