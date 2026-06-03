@@ -38,21 +38,21 @@ This layout is deliberate. Each container has a distinct responsibility, which m
 
 ```mermaid
 flowchart LR
-		U[Client] -->|POST /jobs| API[FastAPI API Container]
-		U -->|GET /jobs/{id}| API
-		U -->|GET /health| API
+    U[Client] -->|POST /jobs| API[FastAPI API Container]
+    U -->|GET job status| API
+    U -->|GET /health| API
 
-		API -->|store job + status| DB[(PostgreSQL)]
-		API -->|queue task| R[(Redis)]
-		R -->|deliver task| W[Celery Worker Container]
-		W -->|read/update job| DB
+    API -->|store job and status| DB[(PostgreSQL)]
+    API -->|queue task| R[(Redis)]
+    R -->|deliver task| W[Celery Worker Container]
+    W -->|read and update job| DB
 
-		GH[GitHub Actions CI] -->|tests pass| DEPLOY[Deploy Workflow]
-		DEPLOY -->|SSH + docker-compose up --build| AWS[AWS EC2 Host]
-		AWS --> API
-		AWS --> W
-		AWS --> DB
-		AWS --> R
+    GH[GitHub Actions CI] -->|tests pass| DEPLOY[Deploy Workflow]
+    DEPLOY -->|SSH and docker-compose up --build| AWS[AWS EC2 Host]
+    AWS --> API
+    AWS --> W
+    AWS --> DB
+    AWS --> R
 ```
 
 ## 🔄 How It Works
